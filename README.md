@@ -12,13 +12,57 @@ For more information about Vault, check the FAQ on [https://getvau.lt/faq.html](
 Please note that this port is not endorsed or in any way associated with James Coglan.
 
 ## Usage
-Check [the unit tests](https://github.com/mstum/TresorLib/blob/master/src/TresorLib.Tests/TresorLibTests.cs) for now.
+Call `Tresor.GeneratePassword` with the service name, passphrase and a `TresorConfig`. For example:
+
+```cs
+var service = "twitter";
+var phrase = "I'm the best 17-year old ever.";
+var password = Tresor.GeneratePassword(service, phrase, TresorConfig.Default);
+
+// password => c;q- q}+&,KTbPVn9]mh
+```
+
+A `service name` is something you pick to uniquely identify services, e.g., `twitter`, `facebook`, `my bank`.
+
+The `passphrase` is a second phrase that you choose. Usually, this is your password that you use everywhere because you can remember it, but don't want to use everywhere anymore because reusing passwords is highly insecure.
+
+The `TresorConfig` defines how the password is generated. Properties include:
+
+* `PasswordLength` (default: 20) - how long should the generated password be? The longer, the better, but some sites restrict the length, sometimes to something comical like 10 characters
+* `MaxRepetition` (default: 0) - how often can a character be repeated. For example, if this is set to 1, then there could be no `nn` in the password, as the character `n` is repeated 2 times. Do note that `nan` is valid, as the character `n` is not immediately repeated. The value 0 means that unlimited repetitions are okay.
+* Character classes: `LowercaseLetters`, `UppercaseLetters`, `Numbers`, `Dash`, `Space` and `Symbols` can be set to one of three modes:
+    * `Allowed` (default): Characters from this character class may appear in the generated password, though that's not guaranteed.
+    * `Required`: Characters from this character class MUST appear in the generated password
+    * `Forbidden`: Characters from this character class MUST NOT appear in the generated password
+    * Character classes are:
+        * `LowercaseLetters`: a-z
+        * `UppercaseLetters`: A-Z
+        * `Numbers`: 0-9
+        * `Dash`: - and _ (hyphen and underscore)
+        * `Space`: A space: ` `
+        * `Symbols`: - _ ! " # $ % ' ( ) * + , . / : ; =  ? @ [ \ ] ^ { | } ~ & < >
+* `RequiredCount` (default: 2): If any character classes are set to `AllowedMode.Require`, how many characters of that group must appear in the output?
+
+Example of a more complex TresorConfig:
+```cs
+var config = TresorConfig.Default;
+config.PasswordLength = 14; // Generated password will be 14 characters long
+config.Space = TresorConfig.AllowedMode.Forbidden; // The space MUST NOT appear in the password
+config.Symbols = TresorConfig.AllowedMode.Forbidden; // No symbols must appear in the password
+config.LowercaseLetters = TresorConfig.AllowedMode.Required; // At least 2 lowercase letters must appear
+config.Numbers = TresorConfig.AllowedMode.Required; // At least 2 numbers must appear
+config.MaxRepetition = 1; // Do not repeat any characters
+config.RequiredCount = 2; // Of every required group, at least 2 characters must appear
+```
+
+Do note that the `RequiredCount` is set for all character classes, so you can't say "at least 2 numbers and 3 lowercase letters". Also note that in the above example, the `PasswordLength` must be at least 4 because we need space for at least 2 numbers and 2 lowercase letters. Setting the `PasswordLength` too small will throw an `System.InvalidOperationException : Length too small to fit all required characters`.
 
 # TODO
 While the code works and behaves like the algorithm on https://getvau.lt/, it is not production ready.
 
 * A lot of the VaultLib code needs to be restructured to use .net idioms instead of being an almost 1:1 port of JavaScript.
 * Needs Documentation of how stuff works.
+* Needs a pass on error handling/which exceptions are being thrown for bad inputs
 
 # Acknowledgements
 * Based on [Vault](https://getvau.lt/) by [James Coglan](http://jcoglan.com/), licensed under GPLv3
