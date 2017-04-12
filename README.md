@@ -31,16 +31,16 @@ The `TresorConfig` defines how the password is generated. Properties include:
 * `PasswordLength` (default: 20) - how long should the generated password be? The longer, the better, but some sites restrict the length, sometimes to something comical like 10 characters
 * `MaxRepetition` (default: 0) - how often can a character be repeated. For example, if this is set to 1, then there could be no `nn` in the password, as the character `n` is repeated 2 times. Do note that `nan` is valid, as the character `n` is not immediately repeated. The value 0 means that unlimited repetitions are okay.
 * Character classes: `LowercaseLetters`, `UppercaseLetters`, `Numbers`, `Dash`, `Space` and `Symbols` can be set to one of three modes:
-    * `Allowed` (default): Characters from this character class may appear in the generated password, though that's not guaranteed.
+    * `Allowed` (default): Characters from this character class may appear in the generated password, though that's not guaranteed
     * `Required`: Characters from this character class MUST appear in the generated password
     * `Forbidden`: Characters from this character class MUST NOT appear in the generated password
     * Character classes are:
-        * `LowercaseLetters`: a-z
-        * `UppercaseLetters`: A-Z
-        * `Numbers`: 0-9
-        * `Dash`: - and _ (hyphen and underscore)
+        * `LowercaseLetters`: `a`-`z`
+        * `UppercaseLetters`: `A`-`Z`
+        * `Numbers`: `0`-`9`
+        * `Dash`: `-` and `_` (hyphen and underscore)
         * `Space`: A space: ` `
-        * `Symbols`: - _ ! " # $ % ' ( ) * + , . / : ; =  ? @ [ \ ] ^ { | } ~ & < >
+        * `Symbols`: `-` `_` `!` `"` `#` `$` `%` `'` `(` `)` `*` `+` `,` `.` `/` `:` `;` `=` `?` `@` `[` `\` `]` `^` `{` `|` `}` `~` `&` `<` `>`
 * `RequiredCount` (default: 2): If any character classes are set to `AllowedMode.Require`, how many characters of that group must appear in the output?
 
 Example of a more complex TresorConfig:
@@ -56,6 +56,8 @@ config.RequiredCount = 2; // Of every required group, at least 2 characters must
 ```
 
 Do note that the `RequiredCount` is set for all character classes, so you can't say "at least 2 numbers and 3 lowercase letters". Also note that in the above example, the `PasswordLength` must be at least 4 because we need space for at least 2 numbers and 2 lowercase letters. Setting the `PasswordLength` too small will throw an `System.InvalidOperationException : Length too small to fit all required characters`.
+
+The `service name` and `passphrase` can contain special/unicode characters. The generated password will always be ASCII-compliant - see the character classes above.
 
 # TODO
 While the code works and behaves like the algorithm on https://getvau.lt/, it is not production ready.
