@@ -14,6 +14,7 @@ See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with this program.
 If not, see http://www.gnu.org/licenses/. */
 #endregion
+using System;
 using Xunit;
 
 namespace Tresor.Tests
@@ -21,7 +22,7 @@ namespace Tresor.Tests
     public class TresorLibErrorTests 
     {
         [Fact]
-        public void Required_NotLongEnough()
+        public void Required_PasswordNotLongEnough_Throws()
         {
             var config = TresorConfig.Default;
             config.RequiredCount = 2;
@@ -29,7 +30,7 @@ namespace Tresor.Tests
             config.LowercaseLetters = TresorConfig.AllowedMode.Required;
             config.Numbers = TresorConfig.AllowedMode.Required;
 
-            var password = Tresor.GeneratePassword("", "", config);
+            Assert.Throws<InvalidOperationException>(() => Tresor.GeneratePassword("", "", config));
         }
 
     }
