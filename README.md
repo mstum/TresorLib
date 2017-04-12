@@ -62,7 +62,7 @@ The `service name` and `passphrase` can contain special/unicode characters. The 
 # TODO
 While the code works and behaves like the algorithm on https://getvau.lt/, it is not production ready.
 
-* A lot of the VaultLib code needs to be restructured to use .net idioms instead of being an almost 1:1 port of JavaScript.
+* A lot of the TresorLib code needs to be restructured to use .net idioms instead of being an almost 1:1 port of JavaScript.
 * Needs Documentation of how stuff works.
 * Needs a pass on error handling/which exceptions are being thrown for bad inputs
 
