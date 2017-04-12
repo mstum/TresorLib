@@ -19,3 +19,4 @@ _Debug
 .vs
 .idea
 packages/
+nuget/

@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>netstandard13;net4</TargetFrameworks>
-    <Version>1.0</Version>
+    <Version>0.9-beta</Version>
     <Product>Tresor</Product>
     <Authors>Michael Stum</Authors>
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
