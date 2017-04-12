@@ -1,6 +1,8 @@
 #region LICENSE
 /* Copyright (C) 2017 Michael Stum <opensource@stum.de>
 
+Adapted from Vault, copyright (C) 2012-2014 James Coglan - https://github.com/jcoglan/vault
+
 This program is free software: you can redistribute it and/or modify it under the terms of the
 GNU General Public License as published by the Free Software Foundation, either version 3 of the
 License, or (at your option) any later version.
