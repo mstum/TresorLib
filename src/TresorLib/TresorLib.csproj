@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard13;net4</TargetFrameworks>
+    <Version>1.0</Version>
+    <Product>Tresor</Product>
+    <Authors>Michael Stum</Authors>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
+    <NeutralLanguage>en</NeutralLanguage>
+    <Description>Tresor generates deterministic passwords from a Service Name and Passphrase</Description>
+    <Copyright>© 2017 Michael Stum</Copyright>
+    <PackageLicenseUrl>https://raw.githubusercontent.com/mstum/TresorLib/master/LICENSE</PackageLicenseUrl>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <PackageProjectUrl>https://github.com/mstum/TresorLib</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/mstum/TresorLib.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>security</PackageTags>
+    <PackageId>TresorLib</PackageId>
+    <IncludeSource>true</IncludeSource>
+    <IncludeSymbols>true</IncludeSymbols>
+  </PropertyGroup>
+
+</Project>
