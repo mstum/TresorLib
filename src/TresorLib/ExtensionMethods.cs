@@ -23,22 +23,15 @@ namespace TresorLib
 {
     internal static class ExtensionMethods
     {
-        internal static List<char> CopyList(this IList<char> input)
+        internal static List<char> CopyList(this IEnumerable<char> input)
         {
-            var result = new List<char>(input.Count);
-            result.AddRange(input);
-            return result;
+            return input.Select(c => c).ToList();
         }
 
-        internal static string ToHexString(this byte[] ba)
+        internal static string ToHexString(this IEnumerable<byte> ba)
         {
-            if(ba == null || ba.Length == 0)
-            {
-                return string.Empty;
-            }
-
-            StringBuilder hex = new StringBuilder(ba.Length * 2);
-            foreach (byte b in ba)
+            StringBuilder hex = new StringBuilder(64);
+            foreach (byte b in ba ?? Enumerable.Empty<byte>())
             {
                 hex.AppendFormat("{0:x2}", b);
             }
@@ -71,12 +64,11 @@ namespace TresorLib
                 deleteCount = null;
             }
 
+            var result = new List<T>();
             if (input == null || start > (input.Count - 1))
             {
-                return new List<T>();
+                return result;
             }
-
-            var result = new List<T>(input.Count);
 
             int countTowards = deleteCount ?? (start + 1);
             for (int i = 0; i < countTowards; i++)
