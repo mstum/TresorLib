@@ -21,32 +21,51 @@ using System.Text;
 
 namespace TresorLib
 {
+    internal class TresorCharacterClasses
+    {
+        internal static readonly char[] Lowercase = new char[] { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z' };
+        internal static readonly char[] Uppercase = new char[] { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z' };
+        internal static readonly char[] Numbers = new char[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
+        internal static readonly char[] Space = new char[] { ' ' };
+        internal static readonly char[] Dashes = new char[] { '-', '_' };
+        internal static readonly char[] Symbols = new char[] { '!', '"', '#', '$', '%', '&', '\'', '(', ')', '*', '+', ',', '.', '/', ':', ';', '<', '=', '>', '?', '@', '[', '\\', ']', '^', '{', '|', '}', '~', '-', '_' };
+
+        internal static readonly char[] All;
+
+        static TresorCharacterClasses()
+        {
+            All = new char[Lowercase.Length + Uppercase.Length + Numbers.Length + Space.Length + Symbols.Length];
+
+            var counter = 0;
+            foreach (var arr in new char[][] { Lowercase, Uppercase, Numbers, Space, Symbols })
+            {
+                for (int i = 0; i < arr.Length; i++)
+                {
+                    All[counter] = arr[i];
+                    counter++;
+                }
+            }
+        }
+    }
+
     internal class TresorImpl
     {
-        private static readonly char[] _lowercaseChars;
-        private static readonly char[] _uppercaseChars;
-        private static readonly char[] _numberChars;
-        private static readonly char[] _spaceChars;
-        private static readonly char[] _dashChars;
-        private static readonly char[] _symbolChars;
-
         private string _phrase;
         private int _length;
         private int _repeat;
         private List<char> _allowed;
         private List<List<char>> _required;
 
-        static TresorImpl()
-        {
-            _lowercaseChars = new[] { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z' };
-            _uppercaseChars = new[] { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z' };
-            _numberChars = new[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
-            _spaceChars = new[] { ' ' };
-            _dashChars = new[] { '-', '_' };
-            _symbolChars = new[] { '!', '"', '#', '$', '%', '&', '\'', '(', ')', '*', '+', ',', '.', '/', ':', ';', '<', '=', '>', '?', '@', '[', '\\', ']', '^', '{', '|', '}', '~' }
-                           .Concat(_dashChars)
-                           .ToArray();
-        }
+        private static List<Tuple<Func<TresorConfig, TresorConfig.AllowedMode>, Func<char[]>>> Accessors =
+            new List<Tuple<Func<TresorConfig, TresorConfig.AllowedMode>, Func<char[]>>>
+                {
+                    new Tuple<Func<TresorConfig, TresorConfig.AllowedMode>, Func<char[]>>(config => config.LowercaseLetters, () => TresorCharacterClasses.Lowercase),
+                    new Tuple<Func<TresorConfig, TresorConfig.AllowedMode>, Func<char[]>>(config => config.UppercaseLetters, () => TresorCharacterClasses.Uppercase),
+                    new Tuple<Func<TresorConfig, TresorConfig.AllowedMode>, Func<char[]>>(config => config.Numbers, () => TresorCharacterClasses.Numbers),
+                    new Tuple<Func<TresorConfig, TresorConfig.AllowedMode>, Func<char[]>>(config => config.Space, () => TresorCharacterClasses.Space),
+                    new Tuple<Func<TresorConfig, TresorConfig.AllowedMode>, Func<char[]>>(config => config.Dash, () => TresorCharacterClasses.Dashes),
+                    new Tuple<Func<TresorConfig, TresorConfig.AllowedMode>, Func<char[]>>(config => config.Symbols, () => TresorCharacterClasses.Symbols)
+                };
 
         internal TresorImpl(TresorConfig config, string passphrase)
         {
@@ -54,22 +73,13 @@ namespace TresorLib
             _length = config.PasswordLength;
             _repeat = config.MaxRepetition;
 
-            var allowed = _lowercaseChars.Concat(_uppercaseChars).Concat(_numberChars).Concat(_spaceChars).Concat(_symbolChars).CopyList();
+            var allowed = TresorCharacterClasses.All.CopyList();
+
             var required = new List<List<char>>();
 
-            var accessors = new List<Tuple<Func<TresorConfig.AllowedMode>, Func<char[]>>>
-                {
-                    new Tuple<Func<TresorConfig.AllowedMode>, Func<char[]>>(() => config.LowercaseLetters, () => _lowercaseChars),
-                    new Tuple<Func<TresorConfig.AllowedMode>, Func<char[]>>(() => config.UppercaseLetters, () => _uppercaseChars),
-                    new Tuple<Func<TresorConfig.AllowedMode>, Func<char[]>>(() => config.Numbers, () => _numberChars),
-                    new Tuple<Func<TresorConfig.AllowedMode>, Func<char[]>>(() => config.Space, () => _spaceChars),
-                    new Tuple<Func<TresorConfig.AllowedMode>, Func<char[]>>(() => config.Dash, () => _dashChars),
-                    new Tuple<Func<TresorConfig.AllowedMode>, Func<char[]>>(() => config.Symbols, () => _symbolChars)
-                };
-
-            foreach (var acc in accessors)
+            foreach (var acc in Accessors)
             {
-                var mode = acc.Item1();
+                var mode = acc.Item1(config);
                 if (mode == TresorConfig.AllowedMode.Forbidden)
                 {
                     Subtract(acc.Item2(), allowed);
@@ -92,19 +102,19 @@ namespace TresorLib
 
         private void Subtract(IList<char> charset, List<char> allowed)
         {
-            if(charset == null || charset.Count == 0)
+            if (charset == null || charset.Count == 0)
             {
                 return;
             }
-            if(allowed == null)
+            if (allowed == null)
             {
                 allowed = _allowed;
             }
 
-            for(int i = 0, n = charset.Count; i < n; i++)
+            for (int i = 0, n = charset.Count; i < n; i++)
             {
                 var index = allowed.IndexOf(charset[i]);
-                if(index >= 0)
+                if (index >= 0)
                 {
                     allowed.Splice(index, 1);
                 }
@@ -130,14 +140,14 @@ namespace TresorLib
             }
             return entropy;
         }
-        
+
         internal string Generate(string service)
         {
-            if(_required.Count > _length)
+            if (_required.Count > _length)
             {
                 throw new InvalidOperationException("Length too small to fit all required characters");
             }
-            if(_allowed.Count == 0)
+            if (_allowed.Count == 0)
             {
                 throw new InvalidOperationException("No characters available to create a password");
             }
@@ -152,7 +162,7 @@ namespace TresorLib
             int i;
             bool same;
 
-            while(result.Length < _length)
+            while (result.Length < _length)
             {
                 index = stream.Generate(required.Count);
                 charset = required.Splice(index, 1)[0];
