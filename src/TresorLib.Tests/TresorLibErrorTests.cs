@@ -17,7 +17,7 @@ If not, see http://www.gnu.org/licenses/. */
 using System;
 using Xunit;
 
-namespace Tresor.Tests
+namespace TresorLib.Tests
 {
     public class TresorLibErrorTests 
     {

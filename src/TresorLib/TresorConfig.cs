@@ -16,7 +16,7 @@ If not, see http://www.gnu.org/licenses/. */
 #endregion
 using System;
 
-namespace Tresor
+namespace TresorLib
 {
     public sealed class TresorConfig
     {

@@ -16,7 +16,7 @@ If not, see http://www.gnu.org/licenses/. */
 #endregion
 using Xunit;
 
-namespace Tresor.Tests
+namespace TresorLib.Tests
 {
     public class TresorLibSpecialCharacterTests
     {

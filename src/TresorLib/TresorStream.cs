@@ -19,7 +19,7 @@ using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace Tresor
+namespace TresorLib
 {
     /// <summary>
     /// Generate uniformly distributed output in any base from a bit stream
