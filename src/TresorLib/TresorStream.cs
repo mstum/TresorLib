@@ -107,7 +107,7 @@ namespace TresorLib
             _bases[numBase].Add(value);
         }
 
-        private int Evaluate(IList<int> chunk, int numBase)
+        private static int Evaluate(IList<int> chunk, int numBase)
         {
             var sum = 0;
             var i = chunk.Count;
