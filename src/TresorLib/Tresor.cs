@@ -46,7 +46,7 @@ namespace TresorLib
                 // Get candidate pool for current character
                 // the same index can be generated multiple times
                 var index = stream.Generate(required.Count);
-                var charset = required.Pop(index).ToList();
+                var charset = required.Pop(index).CheapClone();
 
                 var i = state.MaxRepeat - 1;
                 var same = previous.HasValue && i >= 0;
@@ -63,17 +63,15 @@ namespace TresorLib
                 {
                     if (previous.HasValue)
                     {
-                        while (charset.Contains(previous.Value))
-                        {
-                            charset.Remove(previous.Value);
-                        }
+                        charset.Remove(previous.Value);
                     }
                 }
 
-                var charIndex = stream.Generate(charset.Count);
+                var charIndex = stream.Generate(charset.Length);
+                var c = charset[charIndex];
 
-                result[resultIx] = charset[charIndex];
-                previous = charset[charIndex];
+                result[resultIx] = c;
+                previous = c;
                 resultIx++;
             }
 

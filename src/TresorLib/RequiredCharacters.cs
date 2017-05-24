@@ -1,27 +1,28 @@
 ﻿using System;
-using System.Linq;
+using System.Collections.Generic;
 
 namespace TresorLib
 {
     internal class RequiredCharacters
     {
-        private TresorLinkedList<char[]> _characters;
+        private List<CharacterArray> _characters;
 
         public int Count {  get { return _characters.Count; } }
 
-        public RequiredCharacters()
+        public RequiredCharacters(int length)
         {
-            _characters = new TresorLinkedList<char[]>();
+            _characters = new List<CharacterArray>(length);
         }
 
-        public void Add(char[] requiredCharacters)
+        public void Add(CharacterArray requiredCharacters)
         {
             _characters.Add(requiredCharacters);
         }
 
-        public char[] Pop(int index)
+        public CharacterArray Pop(int index)
         {
-            var result = _characters[index, true];
+            var result = _characters[index];
+            _characters.RemoveAt(index);
             return result;
         }
 

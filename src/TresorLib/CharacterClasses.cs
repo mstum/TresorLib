@@ -20,24 +20,30 @@ namespace TresorLib
 {
     internal static class CharacterClasses
     {
-        internal static readonly char[] Lowercase;
-        internal static readonly char[] Uppercase;
-        internal static readonly char[] Numbers;
-        internal static readonly char[] Space;
-        internal static readonly char[] Dashes;
-        internal static readonly char[] Symbols;
-        internal static readonly char[] All;
+        internal static readonly CharacterArray Lowercase;
+        internal static readonly CharacterArray Uppercase;
+        internal static readonly CharacterArray Numbers;
+        internal static readonly CharacterArray Space;
+        internal static readonly CharacterArray Dashes;
+        internal static readonly CharacterArray Symbols;
+        internal static readonly CharacterArray All;
 
         static CharacterClasses()
         {
-            Lowercase = new char[] { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z' };
-            Uppercase = new char[] { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z' };
-            Numbers = new char[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
-            Space = new char[] { ' ' };
-            Dashes = new char[] { '-', '_' };
-            Symbols = new char[] { '!', '"', '#', '$', '%', '&', '\'', '(', ')', '*', '+', ',', '.', '/', ':', ';', '<', '=', '>', '?', '@', '[', '\\', ']', '^', '{', '|', '}', '~', '-', '_' };
+            Lowercase = new CharacterArray(new char[] { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z' });
+            Uppercase = new CharacterArray(new char[] { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z' });
+            Numbers = new CharacterArray(new char[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' });
+            Space = new CharacterArray(new char[] { ' ' });
+            Dashes = new CharacterArray(new char[] { '-', '_' });
+            Symbols = new CharacterArray(new char[] { '!', '"', '#', '$', '%', '&', '\'', '(', ')', '*', '+', ',', '.', '/', ':', ';', '<', '=', '>', '?', '@', '[', '\\', ']', '^', '{', '|', '}', '~', '-', '_' });
 
-            All = Lowercase.Concat(Uppercase).Concat(Numbers).Concat(Space).Concat(Symbols).ToArray();
+            All = new CharacterArray(new char[] {
+                'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
+                'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+                '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+                ' ',
+                '!', '"', '#', '$', '%', '&', '\'', '(', ')', '*', '+', ',', '.', '/', ':', ';', '<', '=', '>', '?', '@', '[', '\\', ']', '^', '{', '|', '}', '~', '-', '_'
+            });
         }
     }
 }

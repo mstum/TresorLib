@@ -16,7 +16,6 @@ If not, see http://www.gnu.org/licenses/. */
 #endregion
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 
 namespace TresorLib
 {
@@ -25,27 +24,19 @@ namespace TresorLib
         internal string _phrase;
         internal int _length;
         internal int MaxRepeat;
-        internal char[] _allowed;
+        internal CharacterArray _allowed;
         internal RequiredCharacters _required;
         internal readonly int Entropy;
 
-
-        private static void Subtract(IList<char> charset, List<char> allowed)
+        private static List<Tuple<Func<TresorConfig, TresorConfig.AllowedMode>, Func<CharacterArray>>> CharacterClassAccessors = new List<Tuple<Func<TresorConfig, TresorConfig.AllowedMode>, Func<CharacterArray>>>
         {
-            if (charset == null || charset.Count == 0)
-            {
-                return;
-            }
-
-            allowed.RemoveAll(c => charset.Contains(c));
-        }
-
-        private static List<char> CopyList(IList<char> input)
-        {
-            var result = new List<char>(input.Count);
-            result.AddRange(input);
-            return result;
-        }
+            new Tuple<Func<TresorConfig, TresorConfig.AllowedMode>, Func<CharacterArray>>(config => config.LowercaseLetters, () => CharacterClasses.Lowercase),
+            new Tuple<Func<TresorConfig, TresorConfig.AllowedMode>, Func<CharacterArray>>(config => config.UppercaseLetters, () => CharacterClasses.Uppercase),
+            new Tuple<Func<TresorConfig, TresorConfig.AllowedMode>, Func<CharacterArray>>(config => config.Numbers, () => CharacterClasses.Numbers),
+            new Tuple<Func<TresorConfig, TresorConfig.AllowedMode>, Func<CharacterArray>>(config => config.Space, () => CharacterClasses.Space),
+            new Tuple<Func<TresorConfig, TresorConfig.AllowedMode>, Func<CharacterArray>>(config => config.Dash, () => CharacterClasses.Dashes),
+            new Tuple<Func<TresorConfig, TresorConfig.AllowedMode>, Func<CharacterArray>>(config => config.Symbols, () => CharacterClasses.Symbols),
+        };
 
         public TresorGenerationState(TresorConfig config, string passphrase)
         {
@@ -53,46 +44,55 @@ namespace TresorLib
             _length = config.PasswordLength;
             MaxRepeat = config.MaxRepetition;
 
+            _allowed = GetAllowed(config);
+            _required = GetRequired(config);
 
-
-            var allowed = CopyList(CharacterClasses.All);
-            _required = new RequiredCharacters();
-
-            var accessors = new List<Tuple<Func<TresorConfig.AllowedMode>, Func<char[]>>>
-                {
-                    new Tuple<Func<TresorConfig.AllowedMode>, Func<char[]>>(() => config.LowercaseLetters, () => CharacterClasses.Lowercase),
-                    new Tuple<Func<TresorConfig.AllowedMode>, Func<char[]>>(() => config.UppercaseLetters, () => CharacterClasses.Uppercase),
-                    new Tuple<Func<TresorConfig.AllowedMode>, Func<char[]>>(() => config.Numbers, () => CharacterClasses.Numbers),
-                    new Tuple<Func<TresorConfig.AllowedMode>, Func<char[]>>(() => config.Space, () => CharacterClasses.Space),
-                    new Tuple<Func<TresorConfig.AllowedMode>, Func<char[]>>(() => config.Dash, () => CharacterClasses.Dashes),
-                    new Tuple<Func<TresorConfig.AllowedMode>, Func<char[]>>(() => config.Symbols, () => CharacterClasses.Symbols)
-                };
-
-            foreach (var acc in accessors)
-            {
-                var mode = acc.Item1();
-                if (mode == TresorConfig.AllowedMode.Forbidden)
-                {
-                    Subtract(acc.Item2(), allowed);
-                }
-                else if (mode == TresorConfig.AllowedMode.Required)
-                {
-                    for(int i = 0; i < config.RequiredCount; i++)
-                    {
-                        _required.Add(acc.Item2());
-                    }
-                }
-            }
-
-            _allowed = allowed.ToArray();
-
-            var n = config.PasswordLength - _required.Count;
-            while (--n >= 0)
+            while(_required.Count < _length)
             {
                 _required.Add(_allowed);
             }
 
             Entropy = _required.GetEntropy();
+        }
+
+        private static RequiredCharacters GetRequired(TresorConfig config)
+        {
+            var required = new RequiredCharacters(config.PasswordLength);
+            foreach (var acc in CharacterClassAccessors)
+            {
+                var mode = acc.Item1(config);
+                if (mode == TresorConfig.AllowedMode.Required)
+                {
+                    var req = acc.Item2();
+                    for (int i = 0; i < config.RequiredCount; i++)
+                    {
+                        required.Add(req);
+                    }
+                }
+            }
+            return required;
+        }
+
+        private static CharacterArray GetAllowed(TresorConfig config)
+        {
+            var forbidden = new HashSet<char>();
+            foreach (var acc in CharacterClassAccessors)
+            {
+                if(acc.Item1(config) == TresorConfig.AllowedMode.Forbidden)
+                {
+                    foreach(var c in acc.Item2().Enumerate())
+                    {
+                        forbidden.Add(c);
+                    }
+                }
+            }
+
+            var allowed = CharacterClasses.All.CheapClone();
+            foreach(var c in forbidden)
+            {
+                allowed.Remove(c);
+            }
+            return allowed;
         }
     }
 }
