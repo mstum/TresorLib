@@ -32,20 +32,22 @@ namespace TresorLib
         private readonly string _phrase;
         private readonly string _service;
         private readonly int _entropy;
-        private IDictionary<int, List<int>> _bases = new Dictionary<int, List<int>>();
+        private IDictionary<int, IntStream> _bases = new Dictionary<int, IntStream>();
 
         internal TresorStream(string phrase, string service, int entropy)
         {
             _phrase = phrase;
             _service = service;
             _entropy = entropy;
-
+            
             var hash = CreateHash(phrase, service + UUID, 2 * entropy);
-            _bases[2] = new List<int>(hash.Length * 8);
+
+            var bases2 = new List<int>(hash.Length * 8);
             foreach (var hashByte in hash)
             {
-                hashByte.ToBits(_bases[2]);
+                hashByte.ToBits(bases2);
             }
+            _bases[2] = new IntStream(bases2);
         }
 
         internal int Generate(int n, int numBase = 2, bool inner = false)
@@ -53,15 +55,14 @@ namespace TresorLib
             var value = n;
             var k = (int)Math.Ceiling(Math.Log(n) / Math.Log(numBase));
             var r = (int)(Math.Pow(numBase, k)) - n;
-            IList<int> chunk;
 
             // loop:
-            while(value >= n)
+            while (value >= n)
             {
-                chunk = Shift(numBase, k);
-                if(chunk == null)
+                var chunk = Shift(numBase, k);
+                if (chunk == null)
                 {
-                    if(inner)
+                    if (inner)
                     {
                         return n;
                     }
@@ -69,9 +70,9 @@ namespace TresorLib
                 }
 
                 value = Evaluate(chunk, numBase);
-                if(value >= n)
+                if (value >= n)
                 {
-                    if(r == 1)
+                    if (r == 1)
                     {
                         continue; // loop:
                     }
@@ -81,23 +82,17 @@ namespace TresorLib
             }
 
             return value;
-
         }
 
-        private IList<int> Shift(int numBase, int k)
+        private IntStream Shift(int numBase, int k)
         {
             if (!_bases.ContainsKey(numBase) || _bases[numBase].Count < k)
             {
                 return null;
             }
 
-            var result = new List<int>(k);
             var source = _bases[numBase];
-            for (int i = 0; i < k; i++)
-            {
-                result.Add(source[0]);
-                source.RemoveAt(0);
-            }
+            var result = source.Shift(k);
             return result;
         }
 
@@ -105,13 +100,13 @@ namespace TresorLib
         {
             if (!_bases.ContainsKey(numBase))
             {
-                _bases[numBase] = new List<int>();
+                _bases[numBase] = new IntStream();
             }
 
             _bases[numBase].Add(value);
         }
 
-        private static int Evaluate(IList<int> chunk, int numBase)
+        private static int Evaluate(IntStream chunk, int numBase)
         {
             var sum = 0;
             var i = chunk.Count;
@@ -123,14 +118,14 @@ namespace TresorLib
             return sum;
         }
 
-        private static byte[] CreateHash(string key, string message, int entropy)
+        private static byte[] CreateHash(string passphrase, string serviceNameAndUUID, int entropy)
         {
             const int iterations = 8;
             var numBytes = entropy / 8.0f;
             var keySize = ((int)Math.Ceiling(numBytes / 4.0f)) * 4;
 
-            var saltBytes = Encoding.UTF8.GetBytes(message);
-            var pk = new Rfc2898DeriveBytes(key, saltBytes, iterations);
+            var saltBytes = Encoding.UTF8.GetBytes(serviceNameAndUUID);
+            var pk = new Rfc2898DeriveBytes(passphrase, saltBytes, iterations);
             byte[] hash = pk.GetBytes(keySize);
 
             return hash;
