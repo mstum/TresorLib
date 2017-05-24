@@ -26,17 +26,6 @@ namespace TresorLib
         internal readonly RequiredCharacters Required;
         internal readonly TresorStream IndexStream;
 
-        // The order in which we are accessing these matters
-        private static List<Tuple<Func<TresorConfig, TresorConfig.AllowedMode>, CharacterArray>> CharacterClassAccessors = new List<Tuple<Func<TresorConfig, TresorConfig.AllowedMode>, CharacterArray>>
-        {
-            new Tuple<Func<TresorConfig, TresorConfig.AllowedMode>, CharacterArray>(config => config.LowercaseLetters, CharacterClasses.Lowercase),
-            new Tuple<Func<TresorConfig, TresorConfig.AllowedMode>, CharacterArray>(config => config.UppercaseLetters, CharacterClasses.Uppercase),
-            new Tuple<Func<TresorConfig, TresorConfig.AllowedMode>, CharacterArray>(config => config.Numbers, CharacterClasses.Numbers),
-            new Tuple<Func<TresorConfig, TresorConfig.AllowedMode>, CharacterArray>(config => config.Space, CharacterClasses.Space),
-            new Tuple<Func<TresorConfig, TresorConfig.AllowedMode>, CharacterArray>(config => config.Dash, CharacterClasses.Dashes),
-            new Tuple<Func<TresorConfig, TresorConfig.AllowedMode>, CharacterArray>(config => config.Symbols, CharacterClasses.Symbols),
-        };
-
         internal TresorGenerationState(TresorConfig config, string serviceName, string passphrase)
         {
             passphrase = passphrase ?? string.Empty;
@@ -68,24 +57,31 @@ namespace TresorLib
 
         private static void GetAllowedAndRequired(TresorConfig config, out RequiredCharacters required, out CharacterArray allowed)
         {
-            required = new RequiredCharacters(config.PasswordLength);
             var forbidden = new HashSet<char>();
-            foreach (var acc in CharacterClassAccessors)
+            required = new RequiredCharacters(config.PasswordLength);
+
+            void CheckCharacterMode(TresorConfig.AllowedMode mode, CharacterArray chars, RequiredCharacters req)
             {
-                var mode = acc.Item1(config);
                 if (mode == TresorConfig.AllowedMode.Forbidden)
                 {
-                    acc.Item2.EnumerateIntoHashSet(forbidden);
+                    chars.EnumerateIntoHashSet(forbidden);
                 }
                 else if (mode == TresorConfig.AllowedMode.Required)
                 {
-                    var req = acc.Item2;
                     for (int i = 0; i < config.RequiredCount; i++)
                     {
-                        required.Add(req);
+                        req.Add(chars);
                     }
                 }
             }
+
+            // The order in which we are accessing these matters
+            CheckCharacterMode(config.LowercaseLetters, CharacterClasses.Lowercase, required);
+            CheckCharacterMode(config.UppercaseLetters, CharacterClasses.Uppercase, required);
+            CheckCharacterMode(config.Numbers, CharacterClasses.Numbers, required);
+            CheckCharacterMode(config.Space, CharacterClasses.Space, required);
+            CheckCharacterMode(config.Dash, CharacterClasses.Dashes, required);
+            CheckCharacterMode(config.Symbols, CharacterClasses.Symbols, required);
 
             allowed = CharacterClasses.All.CheapClone();
             allowed.Remove(forbidden);
