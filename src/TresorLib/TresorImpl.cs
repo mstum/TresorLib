@@ -66,7 +66,12 @@ namespace TresorLib
                 // If we've hit the limit, remove character from charset
                 if (same)
                 {
-                    if (previous.HasValue) { charset.Remove(previous.Value); }
+                    if (previous.HasValue) {
+                        while (charset.Contains(previous.Value))
+                        {
+                            charset.Remove(previous.Value);
+                        }
+                    }
                 }
                 
                 var charIndex = stream.Generate(charset.Count);
