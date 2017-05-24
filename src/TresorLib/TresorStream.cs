@@ -27,6 +27,8 @@ namespace TresorLib
     /// </summary>
     internal class TresorStream
     {
+        private const string UUID = "e87eb0f4-34cb-46b9-93ad-766c5ab063e7";
+
         private readonly string _phrase;
         private readonly string _service;
         private readonly int _entropy;
@@ -38,7 +40,7 @@ namespace TresorLib
             _service = service;
             _entropy = entropy;
 
-            var hash = CreateHash(phrase, service + Tresor.UUID, 2 * entropy);
+            var hash = CreateHash(phrase, service + UUID, 2 * entropy);
             _bases[2] = new List<int>(hash.Length * 8);
             foreach (var hashByte in hash)
             {
