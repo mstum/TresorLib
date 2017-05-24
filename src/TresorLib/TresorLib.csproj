@@ -14,6 +14,7 @@
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <PackageProjectUrl>https://github.com/mstum/TresorLib</PackageProjectUrl>
     <RepositoryUrl>https://github.com/mstum/TresorLib.git</RepositoryUrl>
+    <PackageIconUrl>http://menhirent.net/nuget/Tresor.png</PackageIconUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>security</PackageTags>
     <PackageId>TresorLib</PackageId>
