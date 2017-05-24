@@ -17,6 +17,7 @@ If not, see http://www.gnu.org/licenses/. */
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace TresorLib
 {
@@ -52,22 +53,20 @@ namespace TresorLib
                 return;
             }
 
-            for (int i = 0, n = charset.Count; i < n; i++)
-            {
-                var index = allowed.IndexOf(charset[i]);
-                if (index >= 0)
-                {
-                    allowed.Splice(index, 1);
-                }
-            }
+            allowed.RemoveAll(c => charset.Contains(c));
         }
 
         private static void Require(IList<char> charset, int n, List<List<char>> required)
         {
             while (n-- != 0)
             {
-                required.Add(charset.CopyList());
+                required.Add(CopyList(charset));
             }
+        }
+
+        private static List<char> CopyList(IEnumerable<char> input)
+        {
+            return input.Select(c => c).ToList();
         }
 
         public TresorGenerationState(TresorConfig config, string passphrase)
@@ -76,7 +75,7 @@ namespace TresorLib
             _length = config.PasswordLength;
             MaxRepeat = config.MaxRepetition;
 
-            var allowed = CharacterClasses.All.CopyList();
+            var allowed = CopyList(CharacterClasses.All);
             var required = new List<List<char>>();
 
             var accessors = new List<Tuple<Func<TresorConfig.AllowedMode>, Func<ReadOnlyCollection<char>>>>
@@ -105,7 +104,7 @@ namespace TresorLib
             var n = config.PasswordLength - required.Count;
             while (--n >= 0)
             {
-                required.Add(allowed.CopyList());
+                required.Add(CopyList(allowed));
             }
 
             _required = required;

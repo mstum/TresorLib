@@ -66,7 +66,8 @@ namespace TresorLib
                 // If we've hit the limit, remove character from charset
                 if (same)
                 {
-                    if (previous.HasValue) {
+                    if (previous.HasValue)
+                    {
                         while (charset.Contains(previous.Value))
                         {
                             charset.Remove(previous.Value);

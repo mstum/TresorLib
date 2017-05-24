@@ -23,20 +23,6 @@ namespace TresorLib
 {
     internal static class ExtensionMethods
     {
-        internal static List<char> CopyList(this IEnumerable<char> input)
-        {
-            return input.Select(c => c).ToList();
-        }
-
-        internal static string ToHexString(this IEnumerable<byte> ba)
-        {
-            StringBuilder hex = new StringBuilder(64);
-            foreach (byte b in ba ?? Enumerable.Empty<byte>())
-            {
-                hex.AppendFormat("{0:x2}", b);
-            }
-            return hex.ToString();
-        }
 
         /// <summary>
         /// (Partial) port of JavaScript's Array.prototype.splice(), just enough to support what I need here
