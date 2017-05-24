@@ -89,8 +89,14 @@ namespace TresorLib
                 return null;
             }
 
-            var result = _bases[numBase].Splice(0, k);
-            return result;                   
+            var result = new List<int>(k);
+            var source = _bases[numBase];
+            for (int i = 0; i < k; i++)
+            {
+                result.Add(source[0]);
+                source.RemoveAt(0);
+            }
+            return result;
         }
 
         private void Push(int numBase, int value)
