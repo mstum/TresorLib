@@ -67,25 +67,26 @@ namespace TresorLib
 
             var required = CopyRequired(state._required);
             var stream = new TresorStream(state._phrase, service, state.Entropy);
-            var result = new StringBuilder(state._length);
+            var result = new char[state._length];
+            var resultIx = 0;
 
             List<char> charset;
-            char? previous;
+            char? previous = null;
             int index;
             int i;
             bool same;
 
-            while(result.Length < state._length)
+            while(resultIx < state._length)
             {
                 index = stream.Generate(required.Count);
-                charset = required.Splice(index, 1)[0];
-                previous = result.Length > 0 ? result[result.Length - 1] : (char?)null;
-                i = state._repeat - 1;
+                charset = required[index];
+                required.RemoveAt(index);
+                i = state.MaxRepeat - 1;
                 same = previous.HasValue && i >= 0;
 
                 while (same && (i-- != 0))
                 {
-                    var sbIndex = result.Length + i - state._repeat;
+                    var sbIndex = resultIx + i - state.MaxRepeat;
                     same = same && (result[sbIndex] == previous);
                 }
                 if (same)
@@ -94,12 +95,14 @@ namespace TresorLib
                     if (previous.HasValue) { charset.RemoveAll(ac => ac == previous); }
                 }
 
-                index = stream.Generate(charset.Count);
+                var charIndex = stream.Generate(charset.Count);
 
-                result.Append(charset[index]);
+                result[resultIx] = charset[charIndex];
+                previous = charset[charIndex];
+                resultIx++;
             }
 
-            return result.ToString();
+            return new string(result);
         }
 
         private static List<List<char>> CopyRequired(List<List<char>> required)

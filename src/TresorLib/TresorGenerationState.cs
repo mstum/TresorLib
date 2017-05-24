@@ -24,7 +24,7 @@ namespace TresorLib
     {
         internal string _phrase;
         internal int _length;
-        internal int _repeat;
+        internal int MaxRepeat;
         internal List<char> _allowed;
         internal List<List<char>> _required;
         internal readonly int Entropy;
@@ -49,7 +49,7 @@ namespace TresorLib
         {
             _phrase = passphrase ?? string.Empty;
             _length = config.PasswordLength;
-            _repeat = config.MaxRepetition;
+            MaxRepeat = config.MaxRepetition;
 
             var allowed = CharacterClasses.All.CopyList();
             var required = new List<List<char>>();
