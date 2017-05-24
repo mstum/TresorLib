@@ -42,11 +42,7 @@ namespace TresorLib
             _bases[2] = new List<int>(hash.Length * 8);
             foreach (var hashByte in hash)
             {
-                var bit = hashByte.ToBits();
-                foreach(var b in bit)
-                {
-                    _bases[2].Add(b == '0' ? 0 : 1);
-                }
+                hashByte.ToBits(_bases[2]);
             }
         }
 
