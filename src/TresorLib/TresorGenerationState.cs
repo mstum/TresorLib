@@ -26,14 +26,15 @@ namespace TresorLib
         internal readonly RequiredCharacters Required;
         internal readonly TresorStream IndexStream;
 
-        private static List<Tuple<Func<TresorConfig, TresorConfig.AllowedMode>, Func<CharacterArray>>> CharacterClassAccessors = new List<Tuple<Func<TresorConfig, TresorConfig.AllowedMode>, Func<CharacterArray>>>
+        // The order in which we are accessing these matters
+        private static List<Tuple<Func<TresorConfig, TresorConfig.AllowedMode>, CharacterArray>> CharacterClassAccessors = new List<Tuple<Func<TresorConfig, TresorConfig.AllowedMode>, CharacterArray>>
         {
-            new Tuple<Func<TresorConfig, TresorConfig.AllowedMode>, Func<CharacterArray>>(config => config.LowercaseLetters, () => CharacterClasses.Lowercase),
-            new Tuple<Func<TresorConfig, TresorConfig.AllowedMode>, Func<CharacterArray>>(config => config.UppercaseLetters, () => CharacterClasses.Uppercase),
-            new Tuple<Func<TresorConfig, TresorConfig.AllowedMode>, Func<CharacterArray>>(config => config.Numbers, () => CharacterClasses.Numbers),
-            new Tuple<Func<TresorConfig, TresorConfig.AllowedMode>, Func<CharacterArray>>(config => config.Space, () => CharacterClasses.Space),
-            new Tuple<Func<TresorConfig, TresorConfig.AllowedMode>, Func<CharacterArray>>(config => config.Dash, () => CharacterClasses.Dashes),
-            new Tuple<Func<TresorConfig, TresorConfig.AllowedMode>, Func<CharacterArray>>(config => config.Symbols, () => CharacterClasses.Symbols),
+            new Tuple<Func<TresorConfig, TresorConfig.AllowedMode>, CharacterArray>(config => config.LowercaseLetters, CharacterClasses.Lowercase),
+            new Tuple<Func<TresorConfig, TresorConfig.AllowedMode>, CharacterArray>(config => config.UppercaseLetters, CharacterClasses.Uppercase),
+            new Tuple<Func<TresorConfig, TresorConfig.AllowedMode>, CharacterArray>(config => config.Numbers, CharacterClasses.Numbers),
+            new Tuple<Func<TresorConfig, TresorConfig.AllowedMode>, CharacterArray>(config => config.Space, CharacterClasses.Space),
+            new Tuple<Func<TresorConfig, TresorConfig.AllowedMode>, CharacterArray>(config => config.Dash, CharacterClasses.Dashes),
+            new Tuple<Func<TresorConfig, TresorConfig.AllowedMode>, CharacterArray>(config => config.Symbols, CharacterClasses.Symbols),
         };
 
         internal TresorGenerationState(TresorConfig config, string serviceName, string passphrase)
@@ -74,11 +75,11 @@ namespace TresorLib
                 var mode = acc.Item1(config);
                 if (mode == TresorConfig.AllowedMode.Forbidden)
                 {
-                    acc.Item2().EnumerateIntoHashSet(forbidden);
+                    acc.Item2.EnumerateIntoHashSet(forbidden);
                 }
                 else if (mode == TresorConfig.AllowedMode.Required)
                 {
-                    var req = acc.Item2();
+                    var req = acc.Item2;
                     for (int i = 0; i < config.RequiredCount; i++)
                     {
                         required.Add(req);
