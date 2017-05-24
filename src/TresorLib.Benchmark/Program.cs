@@ -20,18 +20,24 @@ namespace TresorLib.Benchmark
     [LegacyJitX86Job]
     public class TresorLibBenchmark
     {
+        private readonly static TresorConfig Config;
+
+        static TresorLibBenchmark()
+        {
+            Config = TresorConfig.Default;
+            Config.PasswordLength = 14;
+            Config.Space = TresorConfig.AllowedMode.Forbidden;
+            Config.Symbols = TresorConfig.AllowedMode.Forbidden;
+            Config.MaxRepetition = 1;
+        }
+
         [Benchmark]
         public string GetValue()
         {
-            var service = "twitter";
-            var phrase = "I'm the best 17-year old ever.";
-            var config = TresorConfig.Default;
-            config.PasswordLength = 14;
-            config.Space = TresorConfig.AllowedMode.Forbidden;
-            config.Symbols = TresorConfig.AllowedMode.Forbidden;
-            config.MaxRepetition = 1;
+            const string service = "twitter";
+            const string phrase = "I'm the best 17-year old ever.";
 
-            var password = Tresor.GeneratePassword(service, phrase, config);
+            var password = Tresor.GeneratePassword(service, phrase, Config);
 
             return password;
         }
