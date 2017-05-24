@@ -26,10 +26,10 @@ namespace TresorLib
         internal int _length;
         internal int MaxRepeat;
         internal List<char> _allowed;
-        internal List<List<char>> _required;
+        internal LinkedList<List<char>> _required;
         internal readonly int Entropy;
 
-        private static int GenerateEntropy(List<List<char>> required)
+        private static int GenerateEntropy(LinkedList<List<char>> required)
         {
             int entropy = 0;
 
@@ -39,7 +39,7 @@ namespace TresorLib
                 for (var i = 0; i < n; i++)
                 {
                     entropy += (int)Math.Ceiling(Math.Log(i + 1) / Math.Log(2));
-                    entropy += (int)Math.Ceiling(Math.Log(required[i].Count) / Math.Log(2));
+                    entropy += (int)Math.Ceiling(Math.Log(required.GetAtIndex(i).Count) / Math.Log(2));
                 }
             }
             return entropy;
@@ -55,11 +55,11 @@ namespace TresorLib
             allowed.RemoveAll(c => charset.Contains(c));
         }
 
-        private static void Require(IList<char> charset, int n, List<List<char>> required)
+        private static void Require(IList<char> charset, int n, LinkedList<List<char>> required)
         {
             while (n-- != 0)
             {
-                required.Add(CopyList(charset));
+                required.AddLast(CopyList(charset));
             }
         }
 
@@ -77,7 +77,7 @@ namespace TresorLib
             MaxRepeat = config.MaxRepetition;
 
             var allowed = CopyList(CharacterClasses.All);
-            var required = new List<List<char>>();
+            var required = new LinkedList<List<char>>();
 
             var accessors = new List<Tuple<Func<TresorConfig.AllowedMode>, Func<ReadOnlyCollection<char>>>>
                 {
@@ -105,7 +105,7 @@ namespace TresorLib
             var n = config.PasswordLength - required.Count;
             while (--n >= 0)
             {
-                required.Add(CopyList(allowed));
+                required.AddLast(CopyList(allowed));
             }
 
             _required = required;

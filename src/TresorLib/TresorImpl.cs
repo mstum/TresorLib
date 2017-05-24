@@ -35,7 +35,7 @@ namespace TresorLib
                 throw new InvalidOperationException("No characters available to create a password");
             }
 
-            var required = CopyRequired(state._required);
+            var required = state._required;
             var stream = new TresorStream(state._phrase, service, state.Entropy);
             var result = new char[state._length];
             var resultIx = 0;
@@ -47,8 +47,7 @@ namespace TresorLib
                 // Get candidate pool for current character
                 // the same index can be generated multiple times
                 var index = stream.Generate(required.Count);
-                var charset = required[index];
-                required.RemoveAt(index);
+                var charset = required.GetAtIndex(index, true);
 
                 var i = state.MaxRepeat - 1;
                 var same = previous.HasValue && i >= 0;
@@ -81,12 +80,5 @@ namespace TresorLib
 
             return new string(result);
         }
-
-        private static List<List<char>> CopyRequired(List<List<char>> required)
-        {
-            return required.Select(r => r.Select(rq => rq).ToList()).ToList();
-        }
-
-
     }
 }
