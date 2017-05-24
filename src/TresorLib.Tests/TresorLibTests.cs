@@ -126,5 +126,47 @@ namespace TresorLib.Tests
 
             Assert.Equal("a]C-_7n6@=bui_-_0i*5!", password);
         }
+
+        [Fact]
+        public void RepetitionTest()
+        {
+            var service = "repetitionTest";
+            var phrase = "I'm the best 17-year old ever.";
+            var config = TresorConfig.Default;
+            config.MaxRepetition = 2;
+
+            var password = Tresor.GeneratePassword(service, phrase, config);
+
+            Assert.Equal("cww/~K-2V^vO]+>P>hp*", password);
+
+            config.MaxRepetition = 1;
+            password = Tresor.GeneratePassword(service, phrase, config);
+            Assert.Equal("c~}VGq!B9_k]<Ky,i9&+", password);
+        }
+
+        [Fact]
+        public void RepetitionTest_TripleRepeat()
+        {
+            var service = "g";
+            var phrase = "I'm the best 17-year old ever.";
+            var config = TresorConfig.Default;
+            config.PasswordLength = 30;
+            config.UppercaseLetters = TresorConfig.AllowedMode.Forbidden;
+            config.Numbers = TresorConfig.AllowedMode.Forbidden;
+            config.Dash = TresorConfig.AllowedMode.Forbidden;
+            config.Space = TresorConfig.AllowedMode.Forbidden;
+            config.Symbols = TresorConfig.AllowedMode.Forbidden;
+
+            var password = Tresor.GeneratePassword(service, phrase, config);
+            Assert.Equal("mmmanfespddubqugvmswpoirmfpjxk", password);
+
+            config.MaxRepetition = 2;
+            password = Tresor.GeneratePassword(service, phrase, config);
+            Assert.Equal("mmnanfvjsaubqasbitnvkywolslvno", password);
+
+            config.MaxRepetition = 1;
+            password = Tresor.GeneratePassword(service, phrase, config);
+            Assert.Equal("mnmaofntpdmvbrvgwmtxvcitolptow", password);
+        }
     }
 }

@@ -25,46 +25,27 @@ namespace TresorLib
         {
             var state = new TresorGenerationState(config, serviceName, passphrase);
 
-            var result = new char[state.PasswordLength];
-            var resultIx = 0;
+            var result = new CharBuilder(state.PasswordLength);
 
-            char? previous = null;
-
-            while (resultIx < state.PasswordLength)
+            while (result.Length < state.PasswordLength)
             {
                 // Get candidate pool for current character
                 // the same index can be generated multiple times
                 var index = state.IndexStream.Generate(state.Required.Count);
                 var charset = state.Required.Pop(index).CheapClone();
 
-                var i = state.MaxRepeat - 1;
-                var same = previous.HasValue && i >= 0;
-
-                // Check if we've hit the limit?
-                while (same && (i-- != 0))
+                if (result.HasReachedMaxRepeatLimit(state.MaxRepeat))
                 {
-                    var sbIndex = resultIx + i - state.MaxRepeat;
-                    same = same && (result[sbIndex] == previous);
-                }
-
-                // If we've hit the limit, remove character from charset
-                if (same)
-                {
-                    if (previous.HasValue)
-                    {
-                        charset.Remove(previous.Value);
-                    }
+                    charset.Remove(result.LastAppendedChar.Value);
                 }
 
                 var charIndex = state.IndexStream.Generate(charset.Length);
                 var c = charset[charIndex];
 
-                result[resultIx] = c;
-                previous = c;
-                resultIx++;
+                result.Add(c);
             }
 
-            return new string(result);
+            return result.ToString();
         }
     }
 }
