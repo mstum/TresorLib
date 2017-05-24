@@ -40,21 +40,18 @@ namespace TresorLib
             var result = new char[state._length];
             var resultIx = 0;
 
-            List<char> charset;
             char? previous = null;
-            int index;
-            int i;
-            bool same;
 
             while(resultIx < state._length)
             {
                 // Get candidate pool for current character
-                index = stream.Generate(required.Count);
-                charset = required[index];
+                // the same index can be generated multiple times
+                var index = stream.Generate(required.Count);
+                var charset = required[index];
                 required.RemoveAt(index);
 
-                i = state.MaxRepeat - 1;
-                same = previous.HasValue && i >= 0;
+                var i = state.MaxRepeat - 1;
+                var same = previous.HasValue && i >= 0;
 
                 // Check if we've hit the limit?
                 while (same && (i-- != 0))
