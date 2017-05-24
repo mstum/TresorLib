@@ -26,10 +26,10 @@ namespace TresorLib
         internal int _length;
         internal int MaxRepeat;
         internal List<char> _allowed;
-        internal LinkedList<List<char>> _required;
+        internal TresorLinkedList<List<char>> _required;
         internal readonly int Entropy;
 
-        private static int GenerateEntropy(LinkedList<List<char>> required)
+        private static int GenerateEntropy(TresorLinkedList<List<char>> required)
         {
             int entropy = 0;
 
@@ -39,7 +39,7 @@ namespace TresorLib
                 for (var i = 0; i < n; i++)
                 {
                     entropy += (int)Math.Ceiling(Math.Log(i + 1) / Math.Log(2));
-                    entropy += (int)Math.Ceiling(Math.Log(required.GetAtIndex(i).Count) / Math.Log(2));
+                    entropy += (int)Math.Ceiling(Math.Log(required[i].Count) / Math.Log(2));
                 }
             }
             return entropy;
@@ -55,11 +55,11 @@ namespace TresorLib
             allowed.RemoveAll(c => charset.Contains(c));
         }
 
-        private static void Require(IList<char> charset, int n, LinkedList<List<char>> required)
+        private static void Require(IList<char> charset, int n, TresorLinkedList<List<char>> required)
         {
             while (n-- != 0)
             {
-                required.AddLast(CopyList(charset));
+                required.Add(CopyList(charset));
             }
         }
 
@@ -76,8 +76,8 @@ namespace TresorLib
             _length = config.PasswordLength;
             MaxRepeat = config.MaxRepetition;
 
-            var allowed = CopyList(CharacterClasses.All);
-            var required = new LinkedList<List<char>>();
+            _allowed = CopyList(CharacterClasses.All);
+            _required = new TresorLinkedList<List<char>>();
 
             var accessors = new List<Tuple<Func<TresorConfig.AllowedMode>, Func<ReadOnlyCollection<char>>>>
                 {
@@ -94,22 +94,19 @@ namespace TresorLib
                 var mode = acc.Item1();
                 if (mode == TresorConfig.AllowedMode.Forbidden)
                 {
-                    Subtract(acc.Item2(), allowed);
+                    Subtract(acc.Item2(), _allowed);
                 }
                 else if (mode == TresorConfig.AllowedMode.Required)
                 {
-                    Require(acc.Item2(), config.RequiredCount, required);
+                    Require(acc.Item2(), config.RequiredCount, _required);
                 }
             }
 
-            var n = config.PasswordLength - required.Count;
+            var n = config.PasswordLength - _required.Count;
             while (--n >= 0)
             {
-                required.AddLast(CopyList(allowed));
+                _required.Add(CopyList(_allowed));
             }
-
-            _required = required;
-            _allowed = allowed;
 
             Entropy = GenerateEntropy(_required);
         }

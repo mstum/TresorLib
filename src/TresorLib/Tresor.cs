@@ -45,7 +45,7 @@ namespace TresorLib
                 // Get candidate pool for current character
                 // the same index can be generated multiple times
                 var index = stream.Generate(required.Count);
-                var charset = required.GetAtIndex(index, true);
+                var charset = required[index, true];
 
                 var i = state.MaxRepeat - 1;
                 var same = previous.HasValue && i >= 0;
