@@ -17,41 +17,11 @@ If not, see http://www.gnu.org/licenses/. */
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace TresorLib
 {
     internal static class TresorImpl
-    {
-        internal static void Subtract(IList<char> charset, List<char> allowed, List<char> defaultAllowed)
-        {
-            if(charset == null || charset.Count == 0)
-            {
-                return;
-            }
-            if(allowed == null)
-            {
-                allowed = defaultAllowed;
-            }
-
-            for(int i = 0, n = charset.Count; i < n; i++)
-            {
-                var index = allowed.IndexOf(charset[i]);
-                if(index >= 0)
-                {
-                    allowed.Splice(index, 1);
-                }
-            }
-        }
-
-        internal static void Require(IList<char> charset, int n, List<List<char>> required)
-        {
-            while (n-- != 0)
-            {
-                required.Add(charset.CopyList());
-            }
-        }
-        
+    {        
         internal static string Generate(TresorConfig config, string passphrase, string service)
         {
             var state = new TresorGenerationState(config, passphrase);
@@ -78,23 +48,27 @@ namespace TresorLib
 
             while(resultIx < state._length)
             {
+                // Get candidate pool for current character
                 index = stream.Generate(required.Count);
                 charset = required[index];
                 required.RemoveAt(index);
+
                 i = state.MaxRepeat - 1;
                 same = previous.HasValue && i >= 0;
 
+                // Check if we've hit the limit?
                 while (same && (i-- != 0))
                 {
                     var sbIndex = resultIx + i - state.MaxRepeat;
                     same = same && (result[sbIndex] == previous);
                 }
+                
+                // If we've hit the limit, remove character from charset
                 if (same)
                 {
-                    charset = charset.CopyList();
-                    if (previous.HasValue) { charset.RemoveAll(ac => ac == previous); }
+                    if (previous.HasValue) { charset.Remove(previous.Value); }
                 }
-
+                
                 var charIndex = stream.Generate(charset.Count);
 
                 result[resultIx] = charset[charIndex];

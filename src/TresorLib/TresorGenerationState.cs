@@ -45,6 +45,31 @@ namespace TresorLib
             return entropy;
         }
 
+        private static void Subtract(IList<char> charset, List<char> allowed)
+        {
+            if (charset == null || charset.Count == 0)
+            {
+                return;
+            }
+
+            for (int i = 0, n = charset.Count; i < n; i++)
+            {
+                var index = allowed.IndexOf(charset[i]);
+                if (index >= 0)
+                {
+                    allowed.Splice(index, 1);
+                }
+            }
+        }
+
+        private static void Require(IList<char> charset, int n, List<List<char>> required)
+        {
+            while (n-- != 0)
+            {
+                required.Add(charset.CopyList());
+            }
+        }
+
         public TresorGenerationState(TresorConfig config, string passphrase)
         {
             _phrase = passphrase ?? string.Empty;
@@ -69,11 +94,11 @@ namespace TresorLib
                 var mode = acc.Item1();
                 if (mode == TresorConfig.AllowedMode.Forbidden)
                 {
-                    TresorImpl.Subtract(acc.Item2(), allowed, allowed);
+                    Subtract(acc.Item2(), allowed);
                 }
                 else if (mode == TresorConfig.AllowedMode.Required)
                 {
-                    TresorImpl.Require(acc.Item2(), config.RequiredCount, required);
+                    Require(acc.Item2(), config.RequiredCount, required);
                 }
             }
 
