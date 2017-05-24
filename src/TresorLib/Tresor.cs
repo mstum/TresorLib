@@ -22,8 +22,7 @@ namespace TresorLib
 
         public static string GeneratePassword(string serviceName, string passphrase, TresorConfig config)
         {
-            var tresor = new TresorImpl(config, passphrase);
-            return tresor.Generate(serviceName);
+            return TresorImpl.Generate(config, passphrase, serviceName);
         }
     }
 }
