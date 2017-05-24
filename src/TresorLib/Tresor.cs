@@ -23,30 +23,19 @@ namespace TresorLib
     {
         public static string GeneratePassword(string serviceName, string passphrase, TresorConfig config)
         {
-            var state = new TresorGenerationState(config, passphrase);
+            var state = new TresorGenerationState(config, serviceName, passphrase);
 
-            if (state._required.Count > state._length)
-            {
-                throw new InvalidOperationException("Length too small to fit all required characters");
-            }
-            if (state._allowed.Length == 0)
-            {
-                throw new InvalidOperationException("No characters available to create a password");
-            }
-
-            var required = state._required;
-            var stream = new TresorStream(state._phrase, serviceName, state.Entropy);
-            var result = new char[state._length];
+            var result = new char[state.PasswordLength];
             var resultIx = 0;
 
             char? previous = null;
 
-            while (resultIx < state._length)
+            while (resultIx < state.PasswordLength)
             {
                 // Get candidate pool for current character
                 // the same index can be generated multiple times
-                var index = stream.Generate(required.Count);
-                var charset = required.Pop(index).CheapClone();
+                var index = state.IndexStream.Generate(state.Required.Count);
+                var charset = state.Required.Pop(index).CheapClone();
 
                 var i = state.MaxRepeat - 1;
                 var same = previous.HasValue && i >= 0;
@@ -67,7 +56,7 @@ namespace TresorLib
                     }
                 }
 
-                var charIndex = stream.Generate(charset.Length);
+                var charIndex = state.IndexStream.Generate(charset.Length);
                 var c = charset[charIndex];
 
                 result[resultIx] = c;

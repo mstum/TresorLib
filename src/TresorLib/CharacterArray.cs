@@ -19,6 +19,10 @@ using System.Collections.Generic;
 
 namespace TresorLib
 {
+    /// <summary>
+    /// This CharacterArray wraps an array that can be shared and "virtualizes" Remove-operations.
+    /// This causes Indexer performance to not be O(1), but it avoids constantly copying some char arrays
+    /// </summary>
     internal class CharacterArray
     {
         private readonly char[] _characters;
@@ -44,7 +48,7 @@ namespace TresorLib
         {
             for (int i = 0; i < _characters.Length; i++)
             {
-                if(_characters[i] == c && !_removed[i])
+                if (_characters[i] == c && !_removed[i])
                 {
                     _removed.Set(i, true);
                     Length--;
@@ -52,22 +56,16 @@ namespace TresorLib
             }
         }
 
-        internal void Remove(IEnumerable<char> chars)
+        internal void Remove(HashSet<char> chars)
         {
-            var hs = new HashSet<char>(chars);
             for (int i = 0; i < _characters.Length; i++)
             {
-                if (!_removed[i] && hs.Contains(_characters[i]))
+                if (!_removed[i] && chars.Contains(_characters[i]))
                 {
                     _removed.Set(i, true);
                     Length--;
                 }
             }
-        }
-
-        internal void Remove(CharacterArray ca)
-        {
-            Remove(ca.Enumerate());
         }
 
         internal char this[int index]
@@ -93,13 +91,13 @@ namespace TresorLib
             return new CharacterArray(_characters, _removed, Length);
         }
 
-        internal IEnumerable<char> Enumerate()
+        internal void EnumerateIntoHashSet(HashSet<char> set)
         {
             for (int i = 0; i < _characters.Length; i++)
             {
-                if(!_removed[i])
+                if (!_removed[i])
                 {
-                    yield return _characters[i];
+                    set.Add(_characters[i]);
                 }
             }
         }

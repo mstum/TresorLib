@@ -19,14 +19,12 @@ using System.Collections.Generic;
 
 namespace TresorLib
 {
-    internal struct TresorGenerationState
+    internal class TresorGenerationState
     {
-        internal string _phrase;
-        internal int _length;
-        internal int MaxRepeat;
-        internal CharacterArray _allowed;
-        internal RequiredCharacters _required;
-        internal readonly int Entropy;
+        internal readonly int PasswordLength;
+        internal readonly int MaxRepeat;
+        internal readonly RequiredCharacters Required;
+        internal readonly TresorStream IndexStream;
 
         private static List<Tuple<Func<TresorConfig, TresorConfig.AllowedMode>, Func<CharacterArray>>> CharacterClassAccessors = new List<Tuple<Func<TresorConfig, TresorConfig.AllowedMode>, Func<CharacterArray>>>
         {
@@ -38,30 +36,47 @@ namespace TresorLib
             new Tuple<Func<TresorConfig, TresorConfig.AllowedMode>, Func<CharacterArray>>(config => config.Symbols, () => CharacterClasses.Symbols),
         };
 
-        public TresorGenerationState(TresorConfig config, string passphrase)
+        internal TresorGenerationState(TresorConfig config, string serviceName, string passphrase)
         {
-            _phrase = passphrase ?? string.Empty;
-            _length = config.PasswordLength;
+            passphrase = passphrase ?? string.Empty;
+            PasswordLength = config.PasswordLength;
             MaxRepeat = config.MaxRepetition;
 
-            _allowed = GetAllowed(config);
-            _required = GetRequired(config);
+            CharacterArray allowed;
+            GetAllowedAndRequired(config, out Required, out allowed);
 
-            while(_required.Count < _length)
+            if (allowed.Length == 0)
             {
-                _required.Add(_allowed);
+                throw new InvalidOperationException("No characters available to create a password");
+            }
+            
+            if (Required.Count > PasswordLength)
+            {
+                throw new InvalidOperationException("Length too small to fit all required characters");
             }
 
-            Entropy = _required.GetEntropy();
+            while (Required.Count < PasswordLength)
+            {
+                Required.Add(allowed);
+            }
+
+            var entropy = Required.GetEntropy();
+            
+            IndexStream = new TresorStream(passphrase, serviceName, entropy);
         }
 
-        private static RequiredCharacters GetRequired(TresorConfig config)
+        private static void GetAllowedAndRequired(TresorConfig config, out RequiredCharacters required, out CharacterArray allowed)
         {
-            var required = new RequiredCharacters(config.PasswordLength);
+            required = new RequiredCharacters(config.PasswordLength);
+            var forbidden = new HashSet<char>();
             foreach (var acc in CharacterClassAccessors)
             {
                 var mode = acc.Item1(config);
-                if (mode == TresorConfig.AllowedMode.Required)
+                if (mode == TresorConfig.AllowedMode.Forbidden)
+                {
+                    acc.Item2().EnumerateIntoHashSet(forbidden);
+                }
+                else if (mode == TresorConfig.AllowedMode.Required)
                 {
                     var req = acc.Item2();
                     for (int i = 0; i < config.RequiredCount; i++)
@@ -70,29 +85,9 @@ namespace TresorLib
                     }
                 }
             }
-            return required;
-        }
 
-        private static CharacterArray GetAllowed(TresorConfig config)
-        {
-            var forbidden = new HashSet<char>();
-            foreach (var acc in CharacterClassAccessors)
-            {
-                if(acc.Item1(config) == TresorConfig.AllowedMode.Forbidden)
-                {
-                    foreach(var c in acc.Item2().Enumerate())
-                    {
-                        forbidden.Add(c);
-                    }
-                }
-            }
-
-            var allowed = CharacterClasses.All.CheapClone();
-            foreach(var c in forbidden)
-            {
-                allowed.Remove(c);
-            }
-            return allowed;
+            allowed = CharacterClasses.All.CheapClone();
+            allowed.Remove(forbidden);
         }
     }
 }

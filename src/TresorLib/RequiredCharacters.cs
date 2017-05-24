@@ -7,26 +7,26 @@ namespace TresorLib
     {
         private List<CharacterArray> _characters;
 
-        public int Count {  get { return _characters.Count; } }
+        internal int Count { get { return _characters.Count; } }
 
-        public RequiredCharacters(int length)
+        internal RequiredCharacters(int length)
         {
             _characters = new List<CharacterArray>(length);
         }
 
-        public void Add(CharacterArray requiredCharacters)
+        internal void Add(CharacterArray requiredCharacters)
         {
             _characters.Add(requiredCharacters);
         }
 
-        public CharacterArray Pop(int index)
+        internal CharacterArray Pop(int index)
         {
             var result = _characters[index];
             _characters.RemoveAt(index);
             return result;
         }
 
-        public int GetEntropy()
+        internal int GetEntropy()
         {
             int entropy = 0;
 
