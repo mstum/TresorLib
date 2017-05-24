@@ -15,6 +15,7 @@ You should have received a copy of the GNU General Public License along with thi
 If not, see http://www.gnu.org/licenses/. */
 #endregion
 using System;
+using System.Linq;
 
 namespace TresorLib
 {
@@ -28,7 +29,7 @@ namespace TresorLib
             {
                 throw new InvalidOperationException("Length too small to fit all required characters");
             }
-            if (state._allowed.Count == 0)
+            if (state._allowed.Length == 0)
             {
                 throw new InvalidOperationException("No characters available to create a password");
             }
@@ -45,7 +46,7 @@ namespace TresorLib
                 // Get candidate pool for current character
                 // the same index can be generated multiple times
                 var index = stream.Generate(required.Count);
-                var charset = required[index, true];
+                var charset = required.Pop(index).ToList();
 
                 var i = state.MaxRepeat - 1;
                 var same = previous.HasValue && i >= 0;
