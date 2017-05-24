@@ -38,11 +38,11 @@ namespace TresorLib
             _service = service;
             _entropy = entropy;
 
-            _bases[2] = new List<int>();
             var hash = CreateHash(phrase, service + Tresor.UUID, 2 * entropy);
-            foreach(var hashChar in hash)
+            _bases[2] = new List<int>(hash.Length * 8);
+            foreach (var hashByte in hash)
             {
-                var bit = ToBits(hashChar);
+                var bit = hashByte.ToBits();
                 foreach(var b in bit)
                 {
                     _bases[2].Add(b == '0' ? 0 : 1);
@@ -119,32 +119,7 @@ namespace TresorLib
             return sum;
         }
 
-
-        private static string ToBits(char hexDigit)
-        {
-            switch (hexDigit)
-            {
-                case '0': return "0000";
-                case '1': return "0001";
-                case '2': return "0010";
-                case '3': return "0011";
-                case '4': return "0100";
-                case '5': return "0101";
-                case '6': return "0110";
-                case '7': return "0111";
-                case '8': return "1000";
-                case '9': return "1001";
-                case 'a': case 'A': return "1010";
-                case 'b': case 'B': return "1011";
-                case 'c': case 'C': return "1100";
-                case 'd': case 'D': return "1101";
-                case 'e': case 'E': return "1110";
-                case 'f': case 'F': return "1111";
-                default: throw new ArgumentOutOfRangeException(nameof(hexDigit), "Not a valid Hex Digit: " + hexDigit);
-            }
-        }
-
-        private static string CreateHash(string key, string message, int entropy)
+        private static byte[] CreateHash(string key, string message, int entropy)
         {
             const int iterations = 8;
             var numBytes = entropy / 8.0f;
@@ -154,7 +129,7 @@ namespace TresorLib
             var pk = new Rfc2898DeriveBytes(key, saltBytes, iterations);
             byte[] hash = pk.GetBytes(keySize);
 
-            return hash.ToHexString();
+            return hash;
         }
     }
 }
