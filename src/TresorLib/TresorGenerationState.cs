@@ -17,7 +17,6 @@ If not, see http://www.gnu.org/licenses/. */
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
 
 namespace TresorLib
 {
@@ -64,9 +63,11 @@ namespace TresorLib
             }
         }
 
-        private static List<char> CopyList(IEnumerable<char> input)
+        private static List<char> CopyList(IList<char> input)
         {
-            return input.Select(c => c).ToList();
+            var result = new List<char>(input.Count);
+            result.AddRange(input);
+            return result;
         }
 
         public TresorGenerationState(TresorConfig config, string passphrase)
