@@ -55,16 +55,11 @@ config.MaxRepetition = 1; // Do not repeat any characters
 config.RequiredCount = 2; // Of every required group, at least 2 characters must appear
 ```
 
-Do note that the `RequiredCount` is set for all character classes, so you can't say "at least 2 numbers and 3 lowercase letters". Also note that in the above example, the `PasswordLength` must be at least 4 because we need space for at least 2 numbers and 2 lowercase letters. Setting the `PasswordLength` too small will throw an `System.InvalidOperationException : Length too small to fit all required characters`.
+Do note that the `RequiredCount` is set for all character classes, so you can't say "at least 2 numbers and 3 lowercase letters". Also note that in the above example, the `PasswordLength` must be at least 4 because we need space for at least 2 numbers and 2 lowercase letters. Setting the `PasswordLength` too small will throw a `System.InvalidOperationException : Length too small to fit all required characters`.
+
+Also note that if you set all character classes to `Forbidden`, TresorLib will throw a `System.InvalidOperationException : No characters available to create a password`.
 
 The `service name` and `passphrase` can contain special/unicode characters. The generated password will always be ASCII-compliant - see the character classes above.
-
-# TODO
-While the code works and behaves like the algorithm on https://getvau.lt/, it is not production ready.
-
-* A lot of the TresorLib code needs to be restructured to use .net idioms instead of being an almost 1:1 port of JavaScript.
-* Needs Documentation of how stuff works.
-* Needs a pass on error handling/which exceptions are being thrown for bad inputs
 
 # Acknowledgements
 * Based on [Vault](https://getvau.lt/) by [James Coglan](http://jcoglan.com/), licensed under GPLv3
