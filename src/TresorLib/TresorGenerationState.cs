@@ -32,8 +32,7 @@ namespace TresorLib
             PasswordLength = config.PasswordLength;
             MaxRepeat = config.MaxRepetition;
 
-            CharacterArray allowed;
-            GetAllowedAndRequired(config, out Required, out allowed);
+            GetAllowedAndRequired(config, out Required, out CharacterArray allowed);
 
             if (allowed.Length == 0)
             {
